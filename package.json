@@ -1,0 +1,22 @@
+{
+  "name": "cctv.js",
+  "version": "0.1.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/71104/cctv.js.git"
+  },
+  "author": "Alberto La Rocca <a71104@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/71104/cctv.js/issues"
+  },
+  "homepage": "https://github.com/71104/cctv.js#readme",
+  "dependencies": {
+    "socket.io": "~2.0.4"
+  }
+}
