@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/71104/cctv.js#readme",
   "dependencies": {
+    "serve-static": "~1.13.1",
     "socket.io": "~2.0.4"
   }
 }
