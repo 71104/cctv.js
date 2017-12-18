@@ -12,6 +12,7 @@ $(function () {
     audio: false,
     video: true,
   }).then(function (stream) {
+    io.connect().emit('camera');
     video.prop('srcObject', stream);
   }).catch(function (error) {
     console.error(error);
