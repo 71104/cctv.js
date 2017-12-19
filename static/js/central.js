@@ -4,7 +4,6 @@ function CameraController($scope) {
   const socket = io.connect();
 
   socket.on('list', function (cameras) {
-    console.log('lawl');
     $scope.$apply(function () {
       $scope.cameras = cameras;
     });
