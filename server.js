@@ -1,21 +1,32 @@
-const serveStatic = require('serve-static')('static');
-const app = require('http').Server(serveStatic);
+const serveStatic = require('serve-static')('static', {
+  fallthrough: false,
+});
+
+const app = require('http').Server(function (request, response) {
+  serveStatic(request, response, function () {
+    response.statusCode = 404;
+    response.end();
+  });
+});
+
 const io = require('socket.io')(app);
 
 const centrals = [];
 const cameras = [];
 
 function sendCameraList(socket) {
-  socket.emit('list', cameras.filter(function (camera) {
-    return !!camera;
-  }).map(function (camera, index) {
-    return index;
+  socket.emit('list', cameras.map(function (camera, index) {
+    return camera ? index : -1;
+  }).filter(function (index) {
+    return index >= 0;
   }));
 }
 
 function broadcastCameraList() {
   centrals.forEach(function (central) {
-    sendCameraList(central);
+    if (central) {
+      sendCameraList(central);
+    }
   });
 }
 
@@ -51,7 +62,6 @@ io.on('connection', function (socket) {
       handleCentral(socket);
     }
   }).on('camera', function () {
-    console.log('new camera');
     handleCamera(socket);
   });
 });

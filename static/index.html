@@ -13,7 +13,7 @@
   <script src="js/ui-bootstrap-tpls-2.5.0.min.js"></script>
   <script src="js/central.js"></script>
 </head>
-<body ng-app="Central">
+<body ng-app="Central" ng-cloak>
   <nav class="navbar navbar-default">
     <div class="container-fluid">
       <div class="navbar-header">
@@ -22,8 +22,12 @@
       <a href="camera.html" class="btn btn-primary navbar-btn navbar-right">Switch to camera</a>
     </div>
   </nav>
-  <div class="container">
-    <p>Lorem Ipsum</p>
+  <div class="container" ng-controller="CameraController">
+    <h2>Connected Cameras</h2>
+    <div class="list-group" ng-if="cameras.length">
+      <a href="#" class="list-group-item" ng-repeat="cameraIndex in cameras">Camera {{cameraIndex + 1}}</a>
+    </div>
+    <em ng-if="!cameras.length">None available</em>
   </div>
 </body>
 </html>
