@@ -25,7 +25,7 @@
   <div class="container" ng-controller="CameraController">
     <h2>Connected Cameras</h2>
     <div class="list-group" ng-if="cameras.length">
-      <a href="#" class="list-group-item" ng-repeat="cameraIndex in cameras">Camera {{cameraIndex + 1}}</a>
+      <a href="call.html?index={{cameraIndex}}" class="list-group-item" ng-repeat="cameraIndex in cameras">Camera {{cameraIndex + 1}}</a>
     </div>
     <em ng-if="!cameras.length">None available</em>
   </div>
