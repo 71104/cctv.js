@@ -7,7 +7,7 @@ function CameraController($scope) {
     $scope.$apply(function () {
       $scope.cameras = cameras;
     });
-  }).emit('central', 'test');
+  }).emit('central', 'test').emit('list');
 }
 
 

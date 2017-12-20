@@ -1,15 +1,12 @@
-const serveStatic = require('serve-static')('static', {
-  fallthrough: false,
-});
+const path = require('path');
 
-const app = require('http').Server(function (request, response) {
-  serveStatic(request, response, function () {
-    response.statusCode = 404;
-    response.end();
-  });
-});
+const serveStatic = require('serve-static');
 
-const io = require('socket.io')(app);
+const app = require('express')();
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
+app.use(serveStatic(path.join(__dirname, 'static')));
 
 const centrals = [];
 const cameras = [];
@@ -66,6 +63,6 @@ io.on('connection', function (socket) {
   });
 });
 
-app.listen(process.env.PORT || 8080, function () {
-  console.info('CCTV server listening on port ' + app.address().port);
+http.listen(process.env.PORT || 8080, function () {
+  console.info('CCTV server listening on port ' + http.address().port);
 });
