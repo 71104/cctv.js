@@ -1,11 +1,10 @@
 const path = require('path');
 
-const serveStatic = require('serve-static');
-
 const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
+const serveStatic = require('serve-static');
 app.use(serveStatic(path.join(__dirname, 'static')));
 
 const centrals = [];
@@ -32,8 +31,13 @@ function handleCentral(socket) {
   centrals.push(socket);
   socket.on('list', function () {
     sendCameraList(socket);
-  }).on('call', function (index) {
-    // TODO
+  }).on('call', function (cameraIndex, sdp) {
+    const camera = cameras[cameraIndex];
+    if (camera) {
+      camera.emit('call', index, sdp);
+    } else {
+      socket.emit('call error', index);
+    }
   }).on('disconnect', function () {
     centrals[index] = null;
   });
@@ -43,8 +47,13 @@ function handleCamera(socket) {
   const index = cameras.length;
   cameras.push(socket);
   broadcastCameraList();
-  socket.on('call', function () {
-    // TODO
+  socket.on('call', function (centralIndex, sdp) {
+    const central = centrals[centralIndex];
+    if (central) {
+      central.emit('call', index, sdp);
+    } else {
+      socket.emit('call error', centralIndex);
+    }
   }).on('disconnect', function () {
     cameras[index] = null;
     broadcastCameraList();
@@ -52,12 +61,8 @@ function handleCamera(socket) {
 }
 
 io.on('connection', function (socket) {
-  socket.on('central', function (password) {
-    if (password !== process.env.PASSWORD) {
-      socket.emit('central password error');
-    } else {
-      handleCentral(socket);
-    }
+  socket.on('central', function () {
+    handleCentral(socket);
   }).on('camera', function () {
     handleCamera(socket);
   });
