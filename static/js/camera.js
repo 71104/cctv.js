@@ -13,17 +13,20 @@ $(function () {
     video: true,
   }).then(function (stream) {
     const socket = io.connect();
-    socket.emit('camera').on('call', function (index, sdp) {
+    socket.on('call', function (index, sdp) {
       const pc = new RTCPeerConnection();
-      pc.setRemoteDescription(sdp);
-      pc.createAnswer().then(function (sdp) {
+      var localDescription;
+      pc.setRemoteDescription(sdp).then(function () {
+        return pc.createAnswer();
+      }).then(function (sdp) {
+        localDescription = sdp;
         return pc.setLocalDescription(sdp);
       }).then(function () {
-        socket.emit('call', index, sdp);
+        socket.emit('call', index, localDescription);
       }).catch(function (error) {
         console.error(error);
       });
-    });
+    }).emit('camera');
     video.prop('srcObject', stream);
   }).catch(function (error) {
     console.error(error);
