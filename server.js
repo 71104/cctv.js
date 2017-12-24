@@ -4,6 +4,12 @@ const app = require('express')();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
+const auth = require('http-auth');
+app.use(auth.connect(auth.digest({
+  realm: 'CCTV',
+  file: path.join(__dirname, '.htdigest'),
+})));
+
 const serveStatic = require('serve-static');
 app.use(serveStatic(path.join(__dirname, 'static')));
 
