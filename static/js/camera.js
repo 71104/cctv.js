@@ -15,19 +15,19 @@ $(function () {
   };
 
   Call.prototype._accept = async function (stream, index, offer) {
-    const pc = new RTCPeerConnection({
+    this._connection = new RTCPeerConnection({
       iceServers: [{
         url: 'stun:stun.l.google.com:19302',
       }]
     });
-    pc.onicecandidate = function (event) {
+    this._connection.onicecandidate = function (event) {
       socket.emit('ice candidate', index, event.candidate.candidate);
     };
-    pc.addStream(stream);
+    this._connection.addStream(stream);
     try {
-      await pc.setRemoteDescription(offer);
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
+      await this._connection.setRemoteDescription(offer);
+      const answer = await this._connection.createAnswer();
+      await this._connection.setLocalDescription(answer);
       socket.emit('call', index, answer);
     } catch (error) {
       console.error(error);
@@ -35,7 +35,7 @@ $(function () {
   };
 
   Call.prototype.addIceCandidate = function (candidate) {
-    pc.addIceCandidate(candidate);
+    this._connection.addIceCandidate(candidate);
   };
 
   const calls = Object.create(null);
