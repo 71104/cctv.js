@@ -35,15 +35,20 @@ function broadcastCameraList() {
 function handleCentral(socket) {
   const index = centrals.length;
   centrals.push(socket);
+  const send = function (cameraIndex, name, data) {
+    const camera = cameras[cameraIndex];
+    if (camera) {
+      camera.emit(name, index, data);
+    } else {
+      socket.emit('call error', cameraIndex);
+    }
+  };
   socket.on('list', function () {
     sendCameraList(socket);
   }).on('call', function (cameraIndex, sdp) {
-    const camera = cameras[cameraIndex];
-    if (camera) {
-      camera.emit('call', index, sdp);
-    } else {
-      socket.emit('call error', index);
-    }
+    send(cameraIndex, 'call', sdp);
+  }).on('ice candidate', function (cameraIndex, candidate) {
+    send(cameraIndex, 'ice candidate', candidate);
   }).on('disconnect', function () {
     centrals[index] = null;
   });
@@ -53,13 +58,18 @@ function handleCamera(socket) {
   const index = cameras.length;
   cameras.push(socket);
   broadcastCameraList();
-  socket.on('call', function (centralIndex, sdp) {
+  const send = function (centralIndex, name, data) {
     const central = centrals[centralIndex];
     if (central) {
-      central.emit('call', index, sdp);
+      central.emit(name, index, data);
     } else {
       socket.emit('call error', centralIndex);
     }
+  };
+  socket.on('call', function (centralIndex, sdp) {
+    send(centralIndex, 'call', sdp);
+  }).on('ice candidate', function (centralIndex, candidate) {
+    send(centralIndex, 'ice candidate', candidate);
   }).on('disconnect', function () {
     cameras[index] = null;
     broadcastCameraList();

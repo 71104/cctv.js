@@ -8,8 +8,21 @@ $(function () {
     });
   });
 
-  const accept = async function (stream, socket, index, offer) {
-    const pc = new RTCPeerConnection();
+  const socket = io.connect();
+
+  const Call = function (stream, index, offer) {
+    this._accept(stream, index, offer);
+  };
+
+  Call.prototype._accept = async function (stream, index, offer) {
+    const pc = new RTCPeerConnection({
+      iceServers: [{
+        url: 'stun:stun.l.google.com:19302',
+      }]
+    });
+    pc.onicecandidate = function (event) {
+      socket.emit('ice candidate', index, event.candidate.candidate);
+    };
     pc.addStream(stream);
     try {
       await pc.setRemoteDescription(offer);
@@ -21,10 +34,22 @@ $(function () {
     }
   };
 
+  Call.prototype.addIceCandidate = function (candidate) {
+    pc.addIceCandidate(candidate);
+  };
+
+  const calls = Object.create(null);
+
   const listen = function (stream) {
-    const socket = io.connect();
     socket.on('call', function (index, offer) {
-      accept(stream, socket, index, offer);
+      calls[index] = new Call(stream, index, offer);
+    }).on('ice candidate', function (index, candidate) {
+      const call = calls[index];
+      if (call) {
+        call.addIceCandidate(candidate);
+      }
+    }).on('call error', function (index) {
+      console.error(`central ${index + 1} has left`);
     }).emit('camera');
   };
 

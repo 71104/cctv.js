@@ -8,13 +8,23 @@ $(function () {
   };
 
   const call = async function (index, socket) {
-    const pc = new RTCPeerConnection();
-    pc.onaddstream = function (event) {
-      $('video#video').prop('srcObject', event.streams[0]);
+    const pc = new RTCPeerConnection({
+      iceServers: [{
+        url: 'stun:stun.l.google.com:19302',
+      }]
+    });
+    pc.onicecandidate = function (event) {
+      socket.emit('ice candidate', index, event.candidate.candidate);
     };
-
-    socket.on('call', function (index, answer) {
+    pc.onaddstream = function (event) {
+      $('video#video').prop('srcObject', event.stream);
+    };
+    socket.on('ice candidate', function (index, candidate) {
+      pc.addIceCandidate(candidate);
+    }).on('call', function (index, answer) {
       ready(pc, index, answer);
+    }).on('call error', function (index) {
+      console.error(`camera ${index + 1} has left`);
     }).emit('central');
 
     try {
